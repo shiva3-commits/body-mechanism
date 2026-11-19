@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<title>身体運動のメカニズム 一問一答</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one centered question card under a sticky control bar; chips filter by lecture */
+:root{
+  --bg:#F3F5F7; --surface:#FFFFFF; --fg:#1B2430; --muted:#5F6B7A; --line:#D9DFE6;
+  --accent:#2D5B8A; --accent-soft:#E2EBF4;
+  --ok:#1F7A4D; --ok-soft:#E1F2E8; --ng:#B3372F; --ng-soft:#F8E3E1;
+  --font-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12171E; --surface:#1A212B; --fg:#E6EBF1; --muted:#9AA6B4; --line:#2C3644;
+  --accent:#7FA9D6; --accent-soft:#1F2D3D;
+  --ok:#5FC08E; --ok-soft:#173326; --ng:#F08A80; --ng-soft:#3A1F1D; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12171E; --surface:#1A212B; --fg:#E6EBF1; --muted:#9AA6B4; --line:#2C3644;
+  --accent:#7FA9D6; --accent-soft:#1F2D3D;
+  --ok:#5FC08E; --ok-soft:#173326; --ng:#F08A80; --ng-soft:#3A1F1D; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.75}
+.wrap{max-width:720px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+header h1{font-size:1.45rem;font-weight:900;margin:0;text-wrap:balance;letter-spacing:.02em}
+header p{margin:4px 0 0;color:var(--muted);font-size:.9rem}
+.panel{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.label{font-size:.75rem;color:var(--muted);letter-spacing:.08em;font-weight:700;min-width:4.5em}
+.chip,.seg button,.btn{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:5px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:6px 14px}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.btn:hover,.chip:hover{border-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.status{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:.85rem;color:var(--muted)}
+.bar{flex:1;height:4px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}
+.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.tag{font-size:.75rem;font-weight:700;color:var(--accent);letter-spacing:.06em}
+.q{font-size:1.05rem;margin:0}
+.blank{display:inline-block;min-width:3.2em;text-align:center;border-bottom:2px solid var(--accent);color:var(--accent);font-weight:700;padding:0 4px}
+.opts{display:grid;gap:8px}
+.opt{font:inherit;text-align:left;padding:11px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg);cursor:pointer;display:flex;gap:10px;align-items:baseline}
+.opt .k{font-family:var(--font-mono);color:var(--muted);font-size:.8rem}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--ng);background:var(--ng-soft)}
+.reveal{font:inherit;padding:12px;border:1px dashed var(--accent);border-radius:10px;background:var(--accent-soft);color:var(--accent);font-weight:700;cursor:pointer}
+.ans{border-left:3px solid var(--accent);padding:4px 0 4px 14px;display:flex;flex-direction:column;gap:6px}
+.ans .verdict{font-weight:900}
+.ans .verdict.ok{color:var(--ok)} .ans .verdict.ng{color:var(--ng)}
+.ans .a{font-size:1.15rem;font-weight:900}
+.ans .ex{color:var(--muted);font-size:.92rem;margin:0}
+.self{display:flex;gap:8px;flex-wrap:wrap}
+.self .btn.ok{border-color:var(--ok);color:var(--ok)} .self .btn.ng{border-color:var(--ng);color:var(--ng)}
+.nav{display:flex;justify-content:space-between;gap:8px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:700;padding:8px 20px}
+.done{text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+.done .score{font-family:var(--font-mono);font-size:2.4rem;color:var(--accent)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>身体運動のメカニズム 一問一答</h1>
+    <p>第9回〜第13回（立つ・歩く・走る・跳ぶ・投げる・蹴る・打つ）のスライドから、過去問と同じ穴埋め形式で出題</p>
+  </header>
+
+  <section class="panel" aria-label="出題設定">
+    <div class="row"><span class="label">範囲</span><div class="row" id="chips"></div></div>
+    <div class="row"><span class="label">形式</span>
+      <div class="seg" role="group" aria-label="形式">
+        <button id="m-choice" aria-pressed="true">選択式（過去問形式）</button>
+        <button id="m-recall" aria-pressed="false">一問一答（答えを隠す）</button>
+      </div>
+    </div>
+    <div class="row"><span class="label">順番</span>
+      <div class="seg" role="group" aria-label="順番">
+        <button id="o-order" aria-pressed="true">スライド順</button>
+        <button id="o-shuffle" aria-pressed="false">ランダム</button>
+      </div>
+      <button class="btn" id="restart">最初から</button>
+    </div>
+  </section>
+
+  <div class="status"><span id="pos" class="num">1 / 1</span><div class="bar"><span id="barfill"></span></div><span id="score" class="num">正解 0</span></div>
+
+  <main class="card" id="card" aria-live="polite"></main>
+</div>
+
+<script>
+const CH = ["力学の基礎","立つ","歩く","走る","跳ぶ","運動の名称","投げる","蹴る・打つ"];
+// [章, 問題文（【①】が空欄）, 正解, 誤答の選択肢, 解説]
+const Q = [
+["力学の基礎","外部から力が加えられない限り、運動している物体は等速直線運動を続け、静止している物体はそのまま静止しようとする。この法則を【①】と呼ぶ。","慣性の法則",["運動方程式","作用反作用の法則","運動量保存の法則"],"ニュートンの運動の第一法則。第二法則が運動方程式（ma=F）、第三法則が作用反作用の法則。"],
+["力学の基礎","物体に力を加えたとき、加えた側も同じ量の力を物体から受ける。この法則を【①】と呼ぶ。","作用反作用の法則",["慣性の法則","運動方程式","力積の法則"],"運動の第三法則。地面を押すと地面反力を受けるのもこの法則による。"],
+["力学の基礎","質量は“kg”で表すが、重さは“kg・m/s²”、すなわち【①】という単位で表す。","N（ニュートン）",["J（ジュール）","W（ワット）","Pa（パスカル）"],"重さ＝質量×重力加速度。地球ではg=9.81m/s²、月では1.62m/s²なので、同じ質量でも重さは変わる。"],
+["力学の基礎","身体の運動をモデル化する際、物体の質量中心（≒重心）がどのように動いているかに着目するモデルを【①】と呼ぶ。","質点モデル",["剛体リンクモデル","倒立振子モデル","筋骨格モデル"],"身体を上腕・前腕・大腿などの変形しない部位として、関節でつないだモデルは剛体リンクモデル。"],
+["力学の基礎","身体を上腕、前腕、胴体、大腿、下腿などの変形しない物体として記述し、各部位を関節を介して接続したモデルを【①】と呼ぶ。","剛体リンクモデル",["質点モデル","倒立振子モデル","バネ質量モデル"],"重心の動きだけに着目するのは質点モデル。"],
+["力学の基礎","並進運動の運動方程式はma=Fである。回転運動の運動方程式はIα=Tで表され、Iを【①】、Tをトルク、αを角加速度と呼ぶ。","慣性モーメント",["角運動量","角力積","関節力"],"並進の「質量」に当たるのが回転の「慣性モーメント」。回りにくさを表す。"],
+["力学の基礎","物体にある力・トルクが与えられたときに物体の運動がどう変化するかを求めるのが順動力学である。これに対し、物体の運動の状態が与えられたときに、その運動に必要な力・トルクを求めることを【①】と呼ぶ。","逆動力学",["静力学","運動学","反動力学"],"カメラで撮った動きから関節トルクを計算する方法が逆動力学。"],
+["力学の基礎","位置・速度・加速度・時間など、運動の状態（結果）を記述する変数を【①】的変数と呼ぶ。","キネマティクス",["キネティクス","ダイナミクス","スタティクス"],"力・トルクなど運動の原因を記述する変数はキネティクス的変数。カメラ→キネマティクス、地面反力計→キネティクス。"],
+["力学の基礎","力・トルクなど、運動の原因を記述する変数を【①】的変数と呼ぶ。","キネティクス",["キネマティクス","メカニクス","スタティクス"],"地面反力計（フォースプレート）で測るのがキネティクス的変数。"],
+["力学の基礎","身体部分慣性係数（阿江，1992）によると、体重に対して最も大きな割合を占める部位は【①】である。","体幹（約47.7％）",["大腿（約7.6％）","頭部（約6.9％）","下腿（約3.7％）"],"頭部6.9％、上腕2.4％、前腕1.5％、手0.7％、体幹47.7％、大腿7.6％、下腿3.7％、足1.6％。"],
+["力学の基礎","1秒あたりにする仕事を【①】と呼び、単位はW（ワット）で表す。","仕事率（パワー）",["力学的エネルギー","力積","トルク"],"P=W/t=F・v。仕事Wの単位はJ（ジュール）。"],
+["力学の基礎","力と移動した向きが逆になる仕事は、物体の動きを止める働きをする。このような仕事を【①】の仕事と呼ぶ。","負",["正","逆","零"],"力と移動の向きが同じなら“正”の仕事（物体を加速）、逆なら“負”の仕事（物体を減速）。"],
+["力学の基礎","神経から筋へ電位が伝達され、筋線維の中を伝播する電位を、皮膚上の電極で測定・図示したものを【①】と呼ぶ。","筋電図",["心電図","脳波","地面反力"],"筋の活動の強さやタイミングを調べるのに使う。"],
+["力学の基礎","ある時間内で作用した力を時間で積分した量を【①】と呼び、運動量の変化（mv₂−mv₁）に等しい。","力積",["仕事","角力積","仕事率"],"ある時間内に作用した力に応じて物体の速度は変わる。回転運動では角力積＝角運動量の変化。"],
+["力学の基礎","外からトルクが作用しなければ、角運動量（Iω）は一定に保たれる。これを【①】と呼び、飛び込みや体操の着地では姿勢を変えることで回転運動を制御している。","角運動量保存",["運動量保存","エネルギー保存","慣性の法則"],"身体を小さくまとめて慣性モーメントを小さくすると、角速度が大きくなる（速く回る）。"],
+
+["立つ","身体を支えるために必要な床面積及びその範囲を【①】と呼ぶ。2本の脚で静止するには、身体重心をこの範囲に入れなければならない。","支持基底面",["圧力中心","重心動揺","接地面"],"両足の外側を結んだ範囲が支持基底面。"],
+["立つ","立位姿勢で、地面から身体が受ける力（地面反力）の作用点を【①】と呼ぶ。","圧力中心（COP）",["身体重心","支持基底面","質量中心"],"COP＝Center Of Pressure。"],
+["立つ","立位の安定性を高める要素には、①支持基底面を広げる、②【①】を下げる、③質量を大きくする、の3つがある。","重心",["圧力中心","視線","頭部"],"重心が低いと、同じだけ傾いても重心が支持基底面内に収まる。質量が大きいと、同じ外力でも加速度が小さく、重心動揺を小さくできる。"],
+
+["歩く","歩行とは、片足あるいは両足が地面と接している移動様式である。歩行の局面のうち、足部が地面から離れている局面を【①】と呼ぶ。","遊脚期（回復期）",["立脚期（片脚支持期）","両脚立脚期","滞空期"],"足部が接地＝立脚期（片脚支持期）、両足が接地＝両脚立脚期（両足支持期）。"],
+["歩く","歩行中の重心は立脚期（片脚支持期）に頂点に達し、その後降下して【①】に最も低くなる。","両足支持期",["遊脚期","片脚支持期","離地直後"],"前から見ると、重心は片脚支持期に支持脚に寄り、両足支持期に左右の中央を通る。"],
+["歩く","歩行中は運動エネルギーと位置エネルギーが逆位相で推移し、振り子のように相互にエネルギーを変換して運動している。この歩行のモデルを【①】モデルと呼ぶ。","倒立振子",["質点","剛体リンク","バネ質量"],"エネルギー変換率から、4〜6km/hぐらいの歩行速度が効率的とされる。"],
+["歩く","歩行で、右踵接地から右踵接地まで（2歩の距離）を【①】と呼ぶ。","ストライド長",["ステップ長","ステップ頻度","歩隔"],"右踵接地から左踵接地まで（1歩の距離）はステップ長。ヒトはエネルギーコストが低くなるストライド長を選択する。"],
+
+["走る","走動作は、交互に片足が接地し、かつ両足が同時に接地する時間が無い移動様式である。走動作のうち、足部が地面から離れている局面を【①】と呼ぶ。","滞空期（回復期）",["接地期（支持期）","遊脚期","両脚支持期"],"足部が接地している局面は接地期（支持期）。歩行と違い両足が同時に接地する時間がない。"],
+["走る","走速度は、1秒間で地面に足をついた回数（ステップ頻度）と、一歩で進んだ距離（【①】）の積で表される。","ステップ長",["ストライド長","接地時間","滞空時間"],"走速度＝ステップ頻度×ステップ長。"],
+["走る","個人内でみると、ステップ長は最大疾走速度の70〜80％程度で頭打ちもしくは減少するが、【①】は走速度の上昇に伴って増加する。","ステップ頻度",["接地時間","ストライド長","滞空時間"],"個人間でみると、男女ともタイムが良い競技者ほどステップ長が長い（女性はステップ頻度も高い）。"],
+["走る","走速度が速くなると、支持期中の接地時間は【①】なる。そのため速く走るには、短い時間で大きな力を地面に伝える必要がある。","短く",["長く","変わらなく","不安定に"],"鉛直方向の地面反力は、接地直後に極値が発生し、二峰性になる。"],
+["走る","ランニングの接地直後には足関節で負のトルクパワーが発揮され、【①】が伸びて衝撃を吸収する。","アキレス腱",["膝蓋腱","大腿四頭筋","前脛骨筋"],"支持期後半には足関節で正のトルクパワーが発揮され、アキレス腱が縮んで力を地面へ伝える。"],
+
+["跳ぶ","踏切及び着地が同側の片足で行われる跳び方を【①】と呼ぶ。","ホップ",["ジャンプ","ステップ（リープ）","スキップ"],"ジャンプ＝両足着地、ステップ（リープ）＝ひとまたぎのような左右交互運動、スキップ＝ホップを交互に繰り返す運動。"],
+["跳ぶ","ホップを交互に繰り返す運動を【①】と呼ぶ。","スキップ",["ステップ（リープ）","ジャンプ","バウンディング"],"「跳ぶ」の4様式：ジャンプ・ホップ・ステップ（リープ）・スキップ。"],
+["跳ぶ","空中に投射された物体の最高到達点は (v₀sinθ₀)²/2g＋h₀ で表される。つまり、どれだけ高く跳べるかは離地時の【①】で決まる。","鉛直速度",["水平速度","投射角","滞空時間"],"垂直跳では、地面反力が体重を上回る部分の面積（力積）を大きくすると、離地時の鉛直速度が高まる。"],
+["跳ぶ","ねらいとする方向とは反対に、あらかじめ身体あるいは身体の一部を動かす動作を【①】と呼ぶ。","反動動作",["振込動作","予備動作","踏切動作"],"ねらいとする方向に身体の一部を振り込む動作は振込動作。どちらも地面に加える力を大きくできる。"],
+["跳ぶ","ねらいとする方向に身体の一部（腕など）を振り込む動作を【①】と呼ぶ。","振込動作",["反動動作","引き上げ動作","切り返し動作"],"反動動作とともに、垂直跳中の地面反力を大きくできる動作。"],
+["跳ぶ","接地時間が0.1〜0.2秒程度と短いジャンプを【①】と呼ぶ。このジャンプでは足関節で負のトルクパワーが発揮され、股関節でのトルクパワー発揮は小さい。","リバウンドジャンプ",["カウンタームーブメントジャンプ","スクワットジャンプ","立幅跳"],"時間の制約を受けると運動様式が変わる例。垂直跳の接地時間は0.5秒ほど。"],
+["跳ぶ","走高跳の跳躍高は、H1：踏切離地時の身体重心の高さ、H2：空中で上昇した身体重心の高さ（上昇高）、H3：最大重心高とバー高との差（【①】）で構成される。","クリアランス高",["踏切高","到達高","利得高"],"バークリアランスの工夫により、重心よりも高いバーを跳び越えることができる。"],
+["跳ぶ","走幅跳の跳躍距離は、L1：踏切距離、L2：【①】、L3：着地距離で構成される。","空中距離",["助走距離","踏切距離","滑走距離"],"有効な着地姿勢をとるためには空中の姿勢制御が大事。空中フォームには、そり跳びやはさみ跳びがある。"],
+
+["運動の名称","解剖学で用いる基本姿勢で、直立し、顔は前方を向き視線は水平で、上肢は下垂して手掌は前方を向き、両足が平行になる姿勢を【①】と呼ぶ。","解剖学的正位",["基本的立位肢位","気をつけの姿勢","安静立位"],"運動の名称は、この姿勢を0°として記述する。"],
+["運動の名称","身体を縦割りにして左右に分ける面を【①】と呼ぶ。","矢状面",["前額面","水平面","冠状面"],"前額面＝前部（腹側）と後部（背側）に分ける面、水平面＝上下に分ける面。"],
+["運動の名称","身体を前部（腹側）と後部（背側）に分ける面を【①】と呼ぶ。","前額面",["矢状面","水平面","横断面"],"矢状面上の運動は屈曲・伸展、前額面上の運動は内転・外転。"],
+["運動の名称","矢状面上の運動のうち、骨同士がつくる角度を180°に近づける運動を【①】と呼ぶ。","伸展",["屈曲","外転","外旋"],"屈曲は骨同士がつくる角度を小さくする運動。"],
+["運動の名称","前額面上の運動のうち、体肢を体幹あるいは体の中心線に近づける運動を【①】と呼ぶ。","内転",["外転","内旋","屈曲"],"体の中心線から遠ざける運動は外転。"],
+["運動の名称","外側にあるものを後方に、あるいは前方にあるものを側方に向ける、骨の長軸の回転運動を【①】と呼ぶ。","外旋",["内旋","外転","回外"],"内旋は外旋と逆方向の回転運動。"],
+["運動の名称","肘関節で起こる運動のうち、上腕を動かさずに手掌を体幹の方に向ける運動を【①】と呼ぶ。","回内",["回外","内旋","掌屈"],"回外は回内と逆向きの回転運動。"],
+["運動の名称","肩関節90°外転位で、上腕を水平面で前方へ移動させる動きを【①】と呼ぶ。","水平内転",["水平外転","内旋","屈曲"],"水平外転はその逆向きの運動。"],
+
+["投げる","手に持っている物体に、持っている手によって速度を与えて空中に放す動作を「投げる」という。投げの様式のうち、連動する複数の身体部位が一斉に運動を開始し、投射する手部が直線的に移動する様式を【①】と呼ぶ。","押し型",["投げ型","振り型","突き型"],"大きな力発揮や正確性が求められる場面で多い。例：砲丸投、ダーツ、バスケのシュート。"],
+["投げる","投げの様式のうち、身体の近位部から遠位部へと順次運動を開始し、身体部位の（角）速度が先端ほど高くなる様式を【①】と呼ぶ。","投げ型",["押し型","振り型","引き型"],"高い速度が求められる場面で多い。例：野球の投球動作、やり投げ。"],
+["投げる","ボールを投げることに長けた人は、骨盤→胸部→上腕→前腕→手部の順に加速する。このように近位部から遠位部が順序良く動くことで速度やエネルギーが伝えられていくことを【①】と呼ぶ。","運動連鎖",["相反神経支配","α－γ連関","角運動量保存"],"遠位部は近位部より慣性が小さく、近位部は遠位部より大きな力を発揮できるため、運動連鎖が生じる。"],
+["投げる","空気抵抗を無視した場合、投てき距離はリリース時の初速度・投射角・【①】で決まる。","投射高",["投射速度","滞空時間","回転数"],"リリース時の運動の状態（キネマティクス）で決まる。"],
+["投げる","野球の投球では、リリース直前に肩が鋭く（高い角速度で）【①】する。","内旋",["外旋","水平外転","外転"],"内旋直前の外旋動作は、胸部の回旋と肩関節の水平内転によって生じる。"],
+["投げる","流体中を動く物体に作用する力のうち、物体の動きと逆向きに作用する力を【①】と呼ぶ。","抗力",["揚力","マグヌス力","浮力"],"抗力は物体の後方に渦が生じ、後方の圧力が低下するために生じる。"],
+["投げる","流体中を動く物体に作用する力のうち、抗力に対して垂直な向きに作用する力を【①】と呼ぶ。","揚力",["抗力","重力","摩擦力"],"物体の形状や回転によって上下で速度差が生じ、圧力差が生まれることで生じる（ベルヌーイの式）。"],
+["投げる","回転しながら飛ぶボールに、回転の影響で作用する力を【①】と呼ぶ。","マグヌス力",["コリオリ力","抗力","遠心力"],"変化球が曲がる理由の一つ。"],
+
+["蹴る・打つ","キックのインパクトでは、衝突前の運動量の和と衝突後の運動量の和が等しい（MV₁＋mv₁＝MV₂＋mv₂）。これを【①】と呼ぶ。","運動量保存の法則",["角運動量保存の法則","エネルギー保存の法則","作用反作用の法則"],"例：足部1.81kg×20.5m/s＝37.1kgm/s が、インパクト後に足部24.8＋ボール12.3＝37.1kgm/s に分かれる。"],
+["蹴る・打つ","2物体間の衝突において、衝突前後の相対速度の比を【①】と呼び、0以上1以下の値をとる。","反発係数",["摩擦係数","慣性係数","弾性係数"],"e=1は完全弾性衝突、e=0は完全非弾性衝突。"],
+["蹴る・打つ","バットの点Pを握って点Oでボールを打つと、衝突直後のグリップの加速度が0になり、手に衝撃が加わらない。この点Oを、グリップ点Pに対する【①】と呼ぶ。","撃心（衝撃の中心）",["重心","芯（振動の節）","支点"],"握る位置との距離b＝I/(am)で決まる。"],
+["蹴る・打つ","運動のスキルのうち、環境の変化が少なく安定し、運動の予測が可能な環境における技能を【①】と呼ぶ。","クローズドスキル",["オープンスキル","コーディネーションスキル","ベーシックスキル"],"自身の間合い・タイミングで動作を遂行できる。例：ゴルフ、体操。"],
+["蹴る・打つ","運動のスキルのうち、たえず環境が変化し、運動の予測が不可能な環境における技能を【①】と呼ぶ。","オープンスキル",["クローズドスキル","アダプティブスキル","リアクションスキル"],"相手との駆け引きの中で、その場その時に応じて動く。例：テニス、サッカー。"],
+];
+
+const st={chapters:new Set(CH),mode:"choice",shuffle:false,list:[],i:0,correct:0,answered:false};
+const $=s=>document.querySelector(s);
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+function buildChips(){
+  const box=$("#chips");box.innerHTML="";
+  const all=document.createElement("button");all.className="chip";all.textContent="すべて";
+  all.setAttribute("aria-pressed",st.chapters.size===CH.length);
+  all.onclick=()=>{st.chapters=new Set(CH);start()};box.append(all);
+  CH.forEach(c=>{const n=Q.filter(q=>q[0]===c).length;const b=document.createElement("button");b.className="chip";
+    b.textContent=`${c}（${n}）`;b.setAttribute("aria-pressed",st.chapters.size<CH.length&&st.chapters.has(c));
+    b.onclick=()=>{if(st.chapters.size===CH.length)st.chapters=new Set([c]);else if(st.chapters.has(c)){st.chapters.delete(c);if(!st.chapters.size)st.chapters=new Set(CH)}else st.chapters.add(c);start()};
+    box.append(b)});
+}
+function start(list){
+  buildChips();
+  let l=list||Q.filter(q=>st.chapters.has(q[0]));
+  if(st.shuffle)l=shuf(l);
+  st.list=l.map(q=>({q,opts:shuf([q[2],...q[3]]),res:null}));st.i=0;st.correct=0;render();
+}
+function status(){
+  $("#pos").textContent=`${Math.min(st.i+1,st.list.length)} / ${st.list.length}`;
+  $("#score").textContent=`正解 ${st.correct}`;
+  $("#barfill").style.width=`${st.i/st.list.length*100}%`;
+}
+function render(){
+  status();const card=$("#card");
+  if(st.i>=st.list.length){return finish()}
+  const it=st.list[st.i],[ch,text,ans,,ex]=it.q;
+  const qhtml=esc(text).replace("【①】",'<span class="blank">①</span>');
+  card.innerHTML=`<div class="tag">${ch}</div><p class="q">${qhtml}</p><div id="body"></div><div id="after"></div>`;
+  const body=$("#body");
+  if(st.mode==="choice"){
+    body.className="opts";
+    it.opts.forEach((o,k)=>{const b=document.createElement("button");b.className="opt";
+      b.innerHTML=`<span class="k">${"ABCDE"[k]}</span><span>${esc(o)}</span>`;
+      b.onclick=()=>{const ok=o===ans;it.res=ok;if(ok)st.correct++;
+        body.querySelectorAll(".opt").forEach((x,j)=>{x.disabled=true;if(it.opts[j]===ans)x.classList.add("right");else if(x===b)x.classList.add("wrong")});
+        showAnswer(ok);};
+      body.append(b)});
+  }else{
+    const r=document.createElement("button");r.className="reveal";r.textContent="答えを見る";
+    r.onclick=()=>{r.remove();showAnswer(null)};body.append(r);
+  }
+  function showAnswer(ok){
+    const a=$("#after");
+    const v=ok===null?"":`<div class="verdict ${ok?"ok":"ng"}">${ok?"正解":"不正解"}</div>`;
+    a.innerHTML=`<div class="ans">${v}<div class="a">① ${esc(ans)}</div><p class="ex">${esc(ex)}</p></div>`;
+    if(ok===null){
+      const s=document.createElement("div");s.className="self";
+      s.innerHTML=`<button class="btn ok">わかった</button><button class="btn ng">わからなかった</button>`;
+      const [y,n]=s.querySelectorAll("button");
+      y.onclick=()=>{it.res=true;st.correct++;next()};n.onclick=()=>{it.res=false;next()};
+      a.append(s);
+    }else{
+      const nav=document.createElement("div");nav.className="nav";
+      nav.innerHTML=`<span></span><button class="btn primary">次へ</button>`;
+      nav.querySelector("button").onclick=next;a.append(nav);nav.querySelector("button").focus();
+    }
+    status();
+  }
+}
+function next(){st.i++;render()}
+function finish(){
+  const wrong=st.list.filter(x=>x.res===false).map(x=>x.q);
+  const card=$("#card");
+  card.innerHTML=`<div class="done"><div class="tag">結果</div><div class="score">${st.correct} / ${st.list.length}</div>
+    <p style="margin:0;color:var(--muted)">${wrong.length?`間違えた問題が${wrong.length}問あります。`:"全問正解です。"}</p>
+    <div class="row" style="justify-content:center">${wrong.length?'<button class="btn primary" id="retry">間違えた問題だけ解き直す</button>':""}<button class="btn" id="again">もう一度</button></div></div>`;
+  $("#barfill").style.width="100%";
+  if(wrong.length)$("#retry").onclick=()=>start(wrong);
+  $("#again").onclick=()=>start();
+}
+function seg(a,b,on){$(a).setAttribute("aria-pressed",on);$(b).setAttribute("aria-pressed",!on)}
+$("#m-choice").onclick=()=>{st.mode="choice";seg("#m-choice","#m-recall",true);start()};
+$("#m-recall").onclick=()=>{st.mode="recall";seg("#m-choice","#m-recall",false);start()};
+$("#o-order").onclick=()=>{st.shuffle=false;seg("#o-order","#o-shuffle",true);start()};
+$("#o-shuffle").onclick=()=>{st.shuffle=true;seg("#o-order","#o-shuffle",false);start()};
+$("#restart").onclick=()=>start();
+start();
+</script>
+</body>
+</html>
